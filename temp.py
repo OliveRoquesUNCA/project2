@@ -1,5 +1,7 @@
 import requests
-API_KEY = "dWU1i4ScEWx6H1bKo3wC9RnuuU14S1z4"
+import os
+
+API_KEY=os.environ["GIPHY_API_KEY"]
 
 def get_url_trending():
     url = "https://api.giphy.com/v1/gifs/trending?api_key=" + API_KEY + "&limit=25&offset=0&rating=g"
