@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "proj2"
+name = "project2"
 version = "0.1.0"
-description = "Giphy CLI"
-authors = ["Olive Roques"]
+description = ""
+authors = ["OliveRoquesUNCA <jroques@unca.edu>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.10"
 requests = "^2.31.0"
 click = "^8.1.7"
 
