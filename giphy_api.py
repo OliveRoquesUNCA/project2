@@ -19,7 +19,6 @@ DEFAULT_SEARCH_PARAMS = {
 
 # TODO: 
 # parse response codes
-# markdown formatting
 # lucky random option
 
 class GiphyAPI:
@@ -42,13 +41,13 @@ class GiphyAPI:
             for key, value in kwargs.items():
                 self.query_params[key] = value
     
-    def query(self):
+    def query(self, markdown=False):
         try:
             response = requests.get(self.query_url, params=self.query_params)
             response.raise_for_status()
             json_response:dict = response.json()
             data:list[dict] = json_response['data']
-            results = self.get_results(data)
+            results = self.get_results(data, markdown)
             return results
         
         except HTTPError as httpErr:
@@ -74,9 +73,14 @@ class GiphyAPI:
             print(f"other error: {err}")
 
     #retrieves bitly urls and titles from dict objects in list param, storing results as a dictionary
-    def get_results(self, data:list[dict]):
+    #retrieves full image url instead of shortened if markdown flag is set
+    def get_results(self, data:list[dict], markdown=False):
         results = {}
-        for gif in data:
-            results[gif['title']] = gif['bitly_url']
+        if (not markdown):
+            for gif in data:
+                results[gif['title']] = gif['bitly_url']
+        else:
+            for gif in data:
+                results[gif['title']] = gif['images']['original']['url']
         return results
 
