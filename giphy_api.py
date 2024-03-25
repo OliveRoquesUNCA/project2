@@ -17,11 +17,11 @@ DEFAULT_SEARCH_PARAMS = {
     "limit": "5"
 }
 
-#TODO: 
-# parse response codes 
-# enable CLI passes with click
+# TODO: 
+# parse response codes
 # markdown formatting
 # lucky random option
+
 class GiphyAPI:
     query_type:str = ""
     query_url:str = ""
@@ -33,13 +33,13 @@ class GiphyAPI:
         if(query_type == 'trending'):
             self.query_url = TRENDING_URL
             self.query_params = DEFAULT_TRENDING_PARAMS
-            for key, value in kwargs:
+            for key, value in kwargs.items():
                 self.query_params[key] = value
 
         elif(query_type == 'search'):
             self.query_url = SEARCH_URL
             self.query_params = DEFAULT_SEARCH_PARAMS
-            for key, value in kwargs:
+            for key, value in kwargs.items():
                 self.query_params[key] = value
     
     def query(self):
@@ -48,7 +48,6 @@ class GiphyAPI:
             response.raise_for_status()
             json_response:dict = response.json()
             data:list[dict] = json_response['data']
-            print("print " + self.query_type + " results")
             results = self.get_results(data)
             return results
         
