@@ -7,56 +7,77 @@ API_KEY=os.environ["GIPHY_API_KEY"]
 TRENDING_URL = "https://api.giphy.com/v1/gifs/trending"
 SEARCH_URL = "http://api.giphy.com/v1/gifs/search"
 
-TRENDING_PARAMS = {
+DEFAULT_TRENDING_PARAMS = {
     "api_key": API_KEY,
     "limit": "5"
 }
-SEARCH_PARAMS = {
-    "api_key": API_KEY,
+DEFAULT_SEARCH_PARAMS = {
     "q": "cute cat",
+    "api_key": API_KEY,
     "limit": "5"
 }
 
+#TODO: 
+# parse response codes 
+# enable CLI passes with click
+# markdown formatting
+# lucky random option
 class GiphyAPI:
     query_type:str = ""
     query_url:str = ""
     query_params:dict[str, str] = {}
 
-    def __init__(self, query_type:str):
+    def __init__(self, query_type:str, **kwargs):
         self.query_type = query_type
 
-        if(query_type == "trending"):
+        if(query_type == 'trending'):
             self.query_url = TRENDING_URL
-            self.query_params = TRENDING_PARAMS
+            self.query_params = DEFAULT_TRENDING_PARAMS
+            for key, value in kwargs:
+                self.query_params[key] = value
 
-        elif(query_type == "search"):
+        elif(query_type == 'search'):
             self.query_url = SEARCH_URL
-            self.query_params = SEARCH_PARAMS
+            self.query_params = DEFAULT_SEARCH_PARAMS
+            for key, value in kwargs:
+                self.query_params[key] = value
     
-    #def update_params(self, q, limit, ...):
-
-    def trending_query(self):
+    def query(self):
         try:
             response = requests.get(self.query_url, params=self.query_params)
             response.raise_for_status()
-            #get json
-            jsonResponse:dict = response.json()
-            data:list[dict] = jsonResponse["data"]
-            print("print each url returned")
-            urls = self.get_trending_urls(data)
-            print(urls)
+            json_response:dict = response.json()
+            data:list[dict] = json_response['data']
+            print("print " + self.query_type + " results")
+            results = self.get_results(data)
+            return results
         
-        except HTTPError as http_err:
-            print("http error")
+        except HTTPError as httpErr:
+            print(f"http error: {httpErr}")
         except Exception as err:
-            print("other error")
+            print(f"other error: {err}")
 
-    def get_trending_urls(self, data:list[dict]):
-        urls = []
+    def query_to_file(self, filename:str):
+        try:
+            response = requests.get(self.query_url, params=self.query_params)
+            response.raise_for_status()
+            json_response:dict = response.json()
+            if(self.query_type == 'trending'):
+                with open(filename, "w") as outfile:
+                    json.dump(json_response, outfile)
+            elif(self.query_type == 'search'):
+                with open(filename, "w") as outfile:
+                    json.dump(json_response, outfile)
+
+        except HTTPError as httpErr:
+            print(f"http error: {httpErr}")
+        except Exception as err:
+            print(f"other error: {err}")
+
+    #retrieves bitly urls and titles from dict objects in list param, storing results as a dictionary
+    def get_results(self, data:list[dict]):
+        results = {}
         for gif in data:
-            urls.append(gif['bitly_gif_url'])
-        return urls
-        
-        
-giphy = GiphyAPI("trending")
-giphy.trending_query()
+            results[gif['title']] = gif['bitly_url']
+        return results
+
