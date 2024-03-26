@@ -1,69 +1,62 @@
-import requests
-from requests.exceptions import HTTPError
 import json
 import os
 
-API_KEY=os.environ["GIPHY_API_KEY"]
+import requests
+from requests.exceptions import HTTPError
+
+API_KEY = os.environ["GIPHY_API_KEY"]
 TRENDING_URL = "https://api.giphy.com/v1/gifs/trending"
 SEARCH_URL = "http://api.giphy.com/v1/gifs/search"
 
-DEFAULT_TRENDING_PARAMS = {
-    "api_key": API_KEY,
-    "limit": "5"
-}
-DEFAULT_SEARCH_PARAMS = {
-    "q": "cute cat",
-    "api_key": API_KEY,
-    "limit": "5"
-}
+DEFAULT_TRENDING_PARAMS = {"api_key": API_KEY, "limit": "5"}
+DEFAULT_SEARCH_PARAMS = {"q": "cute cat", "api_key": API_KEY, "limit": "5"}
 
-# TODO: 
+# TODO:
 # parse response codes
-# lucky random option
+
 
 class GiphyAPI:
-    query_type:str = ""
-    query_url:str = ""
-    query_params:dict[str, str] = {}
+    query_type: str = ""
+    query_url: str = ""
+    query_params: dict[str, str] = {}
 
-    def __init__(self, query_type:str, **kwargs):
+    def __init__(self, query_type: str, **kwargs):
         self.query_type = query_type
 
-        if(query_type == 'trending'):
+        if query_type == "trending":
             self.query_url = TRENDING_URL
             self.query_params = DEFAULT_TRENDING_PARAMS
-            for key, value in kwargs.items():
-                self.query_params[key] = value
 
-        elif(query_type == 'search'):
+        elif query_type == "search":
             self.query_url = SEARCH_URL
             self.query_params = DEFAULT_SEARCH_PARAMS
-            for key, value in kwargs.items():
-                self.query_params[key] = value
-    
+
+        for key, value in kwargs.items():
+            self.query_params[key] = value
+
     def query(self, markdown=False):
         try:
             response = requests.get(self.query_url, params=self.query_params)
             response.raise_for_status()
-            json_response:dict = response.json()
-            data:list[dict] = json_response['data']
+            json_response: dict = response.json()
+            data: list[dict] = json_response["data"]
             results = self.get_results(data, markdown)
             return results
-        
+
         except HTTPError as httpErr:
             print(f"http error: {httpErr}")
         except Exception as err:
             print(f"other error: {err}")
 
-    def query_to_file(self, filename:str):
+    def query_to_file(self, filename: str):
         try:
             response = requests.get(self.query_url, params=self.query_params)
             response.raise_for_status()
-            json_response:dict = response.json()
-            if(self.query_type == 'trending'):
+            json_response: dict = response.json()
+            if self.query_type == "trending":
                 with open(filename, "w") as outfile:
                     json.dump(json_response, outfile)
-            elif(self.query_type == 'search'):
+            elif self.query_type == "search":
                 with open(filename, "w") as outfile:
                     json.dump(json_response, outfile)
 
@@ -72,15 +65,22 @@ class GiphyAPI:
         except Exception as err:
             print(f"other error: {err}")
 
-    #retrieves bitly urls and titles from dict objects in list param, storing results as a dictionary
-    #retrieves full image url instead of shortened if markdown flag is set
-    def get_results(self, data:list[dict], markdown=False):
+    # retrieves bitly urls and titles from dict objects in list param
+    # retrieves full image url instead of shortened if markdown flag is set
+    def get_results(self, data: list[dict], markdown=False):
         results = {}
-        if (not markdown):
+        if not markdown:
             for gif in data:
-                results[gif['title']] = gif['bitly_url']
+                results[gif["title"]] = gif["bitly_url"]
         else:
             for gif in data:
-                results[gif['title']] = gif['images']['original']['url']
+                results[gif["title"]] = gif["images"]["original"]["url"]
         return results
 
+
+# uncomment below to create new testing json files
+
+# t = GiphyAPI("trending")
+# t.query_to_file("trendingtest.json")
+# s = GiphyAPI("search", q="cat")
+# s.query_to_file("searchtest.json")

@@ -1,12 +1,9 @@
 # project2
 
-A basic Click command line interface for use with the Giphy API. Supports the Trending and Search endpoints, with plans to implement the Random endpoint to a limited degree ("lucky" command).
+A basic Click command line interface for use with the Giphy API. Supports the Trending and Search endpoints.
 
-Upcoming features:
+## Options
 
-- Parsing response codes from the Giphy API
-- markdown formatting
-- "i'm feeling lucky" random GIF
-- Click error handling and testing
-- More comprehensive unit testing all around
-- GiphyCLI Class
+--count=? : specifies the number of results to retrieve
+--markdown : flag that specifies whether to output in markdown format (default false)
+--lucky : flag that specifies whether to return only the first result (default false)
